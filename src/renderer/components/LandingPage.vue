@@ -1,110 +1,119 @@
 <template lang="pug">
 #wrapper
-	img(id="logo" src="~@/assets/logo.png" alt="electron-vue")
-	main
-		.left-side
-			span.title
-				| Welcome to your new project!
-			system-information
-		.right-side
-			.doc
-				.title Getting Started
-				p
-					| electron-vue comes packed with detailed documentation that covers everything from
-					| internal configurations, using the project structure, building your application,
-					| and so much more.
-				button(@click="open('https://simulatedgreg.gitbooks.io/electron-vue/content/')") Read the Docs
-				br
-				br
-			.doc
-				.title.alt Other Documentation
-				button.alt(@click="open('https://electron.atom.io/docs/')") Electron
-				button.alt(@click="open('https://vuejs.org/v2/guide/')") Vue.js
-	el-row
-		el-button 默认按钮
-		el-button(type='primary') 主要按钮
-		el-button(type='success') 成功按钮
-		el-button(type='info') 信息按钮
-		el-button(type='warning') 警告按钮
-		el-button(type='danger') 危险按钮
+  //- img(id="logo" src="~@/assets/logo.png" alt="electron-vue")
+  h1 AUTO-LOGIN
+  main
+    el-form(ref='form', :model='form', label-width='80px')
+      el-form-item(label='请求地址')
+        el-input(v-model='form.url')
+      el-form-item(label='请求头')
+        el-input(type='textarea', v-model='form.headers')
+      el-form-item(label='请求方式')
+        el-select(v-model='form.method', placeholder='请选择请求方式')
+          el-option(label='GET', value='GET')
+          el-option(label='POST', value='POST')
+      el-form-item(label='请求参数' v-if="form.method === 'GET'")
+        el-input(type='textarea', v-model='form.params')
+      el-form-item(label='请求体' v-if="form.method === 'POST'")
+        el-input(type='textarea', v-model='form.data')
+      el-form-item(label='自动登录')
+        el-switch(v-model='form.autoLogin')
+
+      el-form-item
+        el-button(type='primary', @click='onSubmit') 立即登录
+        //- el-button(@click="clearField") 清空
+    .response {{form.response}}
 </template>
 
 <script>
   import SystemInformation from './LandingPage/SystemInformation'
+  import { Loading } from 'element-ui'
+  import qs from 'qs'
 
   export default {
     name: 'landing-page',
     components: { SystemInformation },
+    data () {
+      return {
+        form: {
+          url: localStorage.url || '', // axios 请求的url
+          headers: localStorage.headers || '', // axios 请求的 headers
+          method: localStorage.method || 'GET', // axios 请求的方式，默认 GET
+          params: localStorage.params || '', // type = GET 时，axios 请求的 params
+          data: localStorage.data || {}, // type = POST 时，axios 请求的 body
+          autoLogin: JSON.parse(localStorage.autoLogin || 'true'), // 是否自动登录
+          response: '' // 返回结果
+        }
+      }
+    },
+
+    mounted () {
+      if (JSON.parse(localStorage.autoLogin)) this.onSubmit()
+    },
+
     methods: {
-      // 配置
-      config () {
-        // 自动登录？
-        // ajax 信息填写：head url body type
+      // 提交
+      async onSubmit () {
+        // 表单信息存储本地
+        localStorage.url = this.form.url
+        localStorage.headers = this.form.headers
+        localStorage.method = this.form.method
+        localStorage.params = this.form.params
+        localStorage.data = this.form.data
+        localStorage.autoLogin = JSON.stringify(this.form.autoLogin)
+
+        // ajax 提交
+        let loadingInstance
+        this.form.response = await this.$http({
+          method: 'post',
+          url: this.form.url,
+          headers: this.evil(this.form.headers),
+          // `transformRequest` 允许在向服务器发送前，修改请求数据
+          transformRequest: [function (data) {
+            loadingInstance = Loading.service({text: '登录中...'})
+            return data
+          }],
+          // `transformResponse` 在传递给 then/catch 前，允许修改响应数据
+          transformResponse: [function (data) {
+            loadingInstance.close()
+            return data
+          }],
+          data: qs.stringify(this.evil(this.form.data)),
+          params: this.evil(this.form.params)
+        })
       },
-      open (link) {
-        this.$electron.shell.openExternal(link)
+
+      // 清空数据
+      // clearField () {
+      //   console.log(this.$refs.form)
+      //   this.$refs['form'].resetFields()
+      //   localStorage.clear()
+      // },
+
+      // 解决eslint不允许使用eval
+      evil (fn) {
+        var Fn = Function
+        return new Fn('return ' + fn)()
       }
     }
   }
 </script>
 
 <style lang="stylus" scoped>
-*
-	box-sizing border-box
-	margin 0
-	padding 0
 body
-	font-family 'Source Sans Pro', sans-serif
 #wrapper
-	background radial-gradient(
-        ellipse at top left,
-        rgba(255, 255, 255, 1) 40%,
-        rgba(229, 229, 229, .9) 100%
-      )
-	height 100vh
-	padding 60px 80px
-	width 100vw
-#logo
-	height auto
-	margin-bottom 20px
-	width 420px
+  height 100vh
+  padding 60px 80px
+  width 100vw
+// #logo
+//   height auto
+//   margin-bottom 20px
+//   width 420px
+h1
+  color #64b587
 main
-	display flex
-	justify-content space-between
-	& > div
-		flex-basis 50%
-.left-side
-	display flex
-	flex-direction column
-.welcome
-	color #555
-	font-size 23px
-	margin-bottom 10px
-.title
-	color #2c3e50
-	font-size 20px
-	font-weight bold
-	margin-bottom 6px
-	&.alt
-		font-size 18px
-		margin-bottom 10px
-.doc
-	p
-		color black
-		margin-bottom 10px
-	button
-		font-size .8em
-		cursor pointer
-		outline none
-		padding 0.75em 2em
-		border-radius 2em
-		display inline-block
-		color #fff
-		background-color #4fc08d
-		transition all 0.15s ease
-		box-sizing border-box
-		border 1px solid #4fc08d
-		&.alt
-			color #42b983
-			background-color transparent
+  display flex
+  justify-content space-between
+  & > div
+    flex-basis 50%
 </style>
