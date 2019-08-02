@@ -41,6 +41,10 @@ let rendererConfig = {
             formatter: require('eslint-friendly-formatter')
           }
         }
+			},
+			{
+        test: /\.styl(us)?$/,
+        use: ['vue-style-loader', 'css-loader', 'stylus-loader']
       },
       {
         test: /\.scss$/,
