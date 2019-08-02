@@ -10,6 +10,9 @@
 - 点击登录按钮进行登录操作，默认会保存信息
 - 请求发出后，会在右方显示请求返回的结果
 
+![auto-login-desktop](./static/auto-login-desktop.jpg)
+
+
 #### 配置说明
 
 - 参数配置
