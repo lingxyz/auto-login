@@ -20,6 +20,13 @@
 				.title.alt Other Documentation
 				button.alt(@click="open('https://electron.atom.io/docs/')") Electron
 				button.alt(@click="open('https://vuejs.org/v2/guide/')") Vue.js
+	el-row
+		el-button 默认按钮
+		el-button(type='primary') 主要按钮
+		el-button(type='success') 成功按钮
+		el-button(type='info') 信息按钮
+		el-button(type='warning') 警告按钮
+		el-button(type='danger') 危险按钮
 </template>
 
 <script>
@@ -29,6 +36,11 @@
     name: 'landing-page',
     components: { SystemInformation },
     methods: {
+      // 配置
+      config () {
+        // 自动登录？
+        // ajax 信息填写：head url body type
+      },
       open (link) {
         this.$electron.shell.openExternal(link)
       }
