@@ -11,6 +11,11 @@ export default new Router({
       component: require('@/components/LandingPage').default
     },
     {
+      path: '/script',
+      name: 'script-page',
+      component: require('@/components/ScriptPage').default
+    },
+    {
       path: '*',
       redirect: '/'
     }

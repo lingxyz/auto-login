@@ -21,18 +21,16 @@
 
       el-form-item
         el-button(type='primary', @click='onSubmit') 立即登录
-        //- el-button(@click="clearField") 清空
+        el-button(@click="$router.push('/script')") 切换至脚本
     .response {{form.response}}
 </template>
 
 <script>
-  import SystemInformation from './LandingPage/SystemInformation'
   import { Loading } from 'element-ui'
   import qs from 'qs'
 
   export default {
     name: 'landing-page',
-    components: { SystemInformation },
     data () {
       return {
         form: {
